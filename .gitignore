@@ -1,0 +1,10 @@
+*.exe
+*.dll
+*.so
+*.a
+*.out
+build/
+bin/
+
+/.vscode
+pager
