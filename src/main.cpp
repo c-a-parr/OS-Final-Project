@@ -141,7 +141,72 @@ int FIFO(int frameCount,
          int table[][1000])
 {
     std::cout << "Running FIFO" << std::endl;
-    return 0;
+
+    // Frames[i] = page in frame i, or -1 if empty
+    int frames[50];
+
+    // Initialize all frames as empty
+    for (int i = 0; i < frameCount; i++)
+    {
+        frames[i] = -1;
+    }
+
+    int pageFaults = 0;
+
+    // FIFO queue pointer/ next frame to replace
+    int fifoIndex = 0;
+
+    // t for time
+    for (int t = 0; t < refCount; t++)
+    {
+        int page = refs[t];
+
+        int position = findPage(frames, frameCount, page);
+
+        bool fault = false;
+
+        if (position == -1)
+        {
+            fault = true;
+            pageFaults++;
+
+            // Search for free frame first
+            int freeIndex = -1;
+
+            for (int i = 0; i < frameCount; i++)
+            {
+                if (frames[i] == -1)
+                {
+                    freeIndex = i;
+                    break;
+                }
+            }
+
+            if (freeIndex != -1)
+            {
+                // Still space, use first free frame
+                frames[freeIndex] = page;
+            } else {
+                // No free frame, replace using FIFO
+                frames[fifoIndex] = page;
+                fifoIndex = (fifoIndex + 1) % frameCount;
+            }
+        }
+
+        // Only write frames into table when a fault occurs
+        // Else the column stays blank when printed
+        // f for frame
+        if (fault)
+        {
+            for (int f = 0; f < frameCount; f++)
+            {
+                table[f][t] = frames[f];
+            }
+        }
+
+    }
+
+    return pageFaults;
 }
 
 int OPT(int frameCount,
