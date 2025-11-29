@@ -33,6 +33,7 @@ std::string readLineFromFile(const char *filename) {    // Function header
  * @param refs An array to store the reference values.
  * @param refCount The number of references in the input line.
  */
+
 void parseInputLine(const std::string &line,            // The input line to parse
                     char &algo,                         // The selected algorithm
                     int &frameCount,                    // Number of frames that can be used
@@ -156,52 +157,64 @@ int findPage(int frames[],                              // The frames
     return -1;                                          // Return -1 if page not found
 }                                                       // End of function findPage
 
+/**
+ * @brief Tester function for testing the program functions
+ */
+
 void testers()
 {
-    std::string testLine = readLineFromFile("data/TESTER_CORRECT.txt");
+    std::string testLine =                              // The input line
+        readLineFromFile("data/TESTER_CORRECT.txt");    // Read the input line from test file
     
-    std::cout << "Input Line: " << testLine << "\n";
+    std::cout << "Input Line: " <<                      // Print the input line
+        testLine << "\n";                               // Print the string from the file
 
-    int frameCount, refCount;
-    char algo;
-    int refs[100];
+    int frameCount, refCount;                           // The number of frames that can be used and the reference count
+    char algo;                                          // The algorithm to use
+    int refs[100];                                      // The reference string
 
-    int displayTable[50][1000];
+    int displayTable[50][1000];                         // Test display table
 
-    parseInputLine(testLine, 
-                   algo, 
-                   frameCount, 
-                   refs, 
-                   refCount);
+    parseInputLine(testLine,                            // Testing the parseInputLine function
+                   algo,                                // Algorithm to use
+                   frameCount,                          // Number of frames that can be used
+                   refs,                                // References from input file
+                   refCount);                           // Number of references from input file
 
-    std::cout << "Algorithm: " << algo << "\n";
-    std::cout << "Frame Count: " << frameCount << "\n";
-    std::cout << "Reference String: ";
+    std::cout << "Algorithm: " <<                       // Display algorithm line
+        algo << "\n";                                   // The algorithm used
+    std::cout << "Frame Count: " <<                     // The number of frames that can be used
+        frameCount << "\n";                             // The number of frames that can be used
+    std::cout << "Reference String: ";                  // Start of displaying the reference string
 
-    for (int i = 0; i < refCount; i++) {
-        std::cout << refs[i] << " ";
-    }
+    for (int i = 0;                                     // Start for loop
+         i < refCount;                                  // Number of references in the file
+         i++) {                                         // Increment the index
+        std::cout << refs[i] << " ";                    // Display the reference string
+    }                                                   // End for loop
 
-    std::cout << "\n";
+    std::cout << "\n";                                  // Insert next line
 
-    wipeTable(displayTable, 
-              frameCount, 
-              refCount);
+    wipeTable(displayTable,                             // Wipe the displayTable
+              frameCount,                               // Number of frames that can be used
+              refCount);                                // Number of references from input file
 
-    for (int i = 0; 
-         i < frameCount; 
-         i++) {
-        for (int j = 0; 
-             j < refCount; 
-             j++) {
-            std::cout << displayTable[i][j] << " ";
-        }
-        std::cout << "\n";
-    }
+    for (int i = 0;                                     // Start for loop
+         i < frameCount;                                // While index is less than the number of frames that can be used
+         i++) {                                         // Increment the index
+
+        for (int j = 0;                                 // Start for loop 
+             j < refCount;                              // While index is less than the number of references from input file
+             j++) {                                     // Increment the index
+
+            std::cout << displayTable[i][j] << " ";     // Display the table results
+        }                                               // End for loop
+        std::cout << "\n";                              // Insert next line
+    }                                                   // End for loop
     
-    std::cout << "\n";
+    std::cout << "\n";                                  // Insert next line
 
-}
+}                                                       // End testers function
 
 int FIFO(int frameCount,
          int refs[],
@@ -283,74 +296,109 @@ int OPT(int frameCount,
          int table[][1000])
 {
     std::cout << "Running OPT" << std::endl;
+
+    std::cout << "Currently, there isn't an implementation for OPT,\n" <<
+                 "so this will just print out a blank table" << std::endl;
+
     return 0;
 }
+
+/**
+ * @brief Runs the LRU algorithm, which will remove the least recently used page from memory when a new page fault occurs
+ */
 
 int LRU(int frameCount,
         int refs[],
         int refCount,
         int table[][1000])
 {
-    std::cout << "Running LRU" << std::endl;
+    std::cout << "Running LRU" << std::endl;            // Display that the program is running LRU
 
-    int frames[50];
-    int lastUsed[50];
+    int frames[50];                                     // Array to hold the frames
+    int lastUsed[50];                                   // Array to hold the last used time of each frame
+                                                        // Clear frames and lastUsed to -1
+    for (int i = 0;                                     // Start of for loop
+         i < frameCount;                                // As long as index is less than the number of frames
+         i++) {                                         // Increment index by one
 
-    for (int i = 0; i < frameCount; i++) {
-        frames[i] = -1;
-        lastUsed[i] = -1;
-    }
+        frames[i] = -1;                                 // Set the value of frames to -1
+        lastUsed[i] = -1;                               // Set the value of lastUsed to -1
+    }                                                   // End of for loop
 
-    int pageFaults = 0;
+    int pageFaults = 0;                                 // Store number of page faults
 
-    for (int t = 0; t < refCount; t++) {
-        int page = refs[t];
-        int pos = findPage(frames, frameCount, page);
-        bool fault = false;
+    for (int t = 0;                                     // Start of for loop
+         t < refCount;                                  // As long as index is less than the number of references
+         t++) {                                         // Increment index by one
 
-        if (pos != -1) {
-            lastUsed[pos] = t;
-        } else {
-            fault = true;
-            pageFaults++;
+        int page = refs[t];                             // Store the current reference in page
+                                                        // Check if the current reference is in the frames
+        int position = findPage(frames,                 // Frames array
+                                frameCount,             // How many frames we use
+                                page);                  // Page to find
 
-            int freeIndex = -1;
-            for (int i = 0; i < frameCount; i++) {
-                if (frames[i] == -1) {
-                    freeIndex = i;
-                    break;
-                }
+        bool fault = false;                             // Default fault to false
+
+        if (position != -1) {                           // If the current position does not equal -1
+            lastUsed[position] = t;                     // Set last used at this position to current index
+        } else {                                        // Else if the current position does equal -1
+            fault = true;                               // Set fault to true
+            pageFaults++;                               // Increment page faults
+
+            int freeIndex = -1;                         // Set the index to -1
+
+            for (int i = 0;                             // Start of for loop
+                 i < frameCount;                        // As long as index is less than the number of frames we can use
+                 i++) {                                 // Increment index by one
+
+                if (frames[i] == -1) {                  // If this frame is equal to -1
+                    freeIndex = i;                      // Set the free index to this index to show this is available
+                    break;                              // Break
+                }                                       // End if statement
             }
 
-            if (freeIndex != -1) {
-                frames[freeIndex] = page;
-                lastUsed[freeIndex] = t;
-            } else {
-                int lruIndex = 0;
-                int oldest = lastUsed[0];
+            if (freeIndex != -1) {                      // If the free index is not -1
+                frames[freeIndex] = page;               // Set this frames index to the current page
+                lastUsed[freeIndex] = t;                // Set the last used to current current index
+            } else {                                    // Else if
+                int lruIndex = 0;                       // Set the LRU index 
+                int oldest = lastUsed[0];               // Set the the oldest to the first element in the array
 
-                for (int i = 1; i < frameCount; i++) {
-                    if (lastUsed[i] < oldest) {
-                        oldest = lastUsed[i];
-                        lruIndex = i;
-                    }
-                }
+                for (int i = 1;                         // Start of for loop
+                     i < frameCount;                    // As long as index is less than the number of frames we can use
+                     i++) {                             // Increment index by one
+                    if (lastUsed[i] < oldest) {         // If the last used is less than the oldest
+                        oldest = lastUsed[i];           // Set the oldest to this index
+                        lruIndex = i;                   // Set the lru index to this index
+                    }                                   // End if statement
+                }                                       // End for loop
 
-                frames[lruIndex] = page;
-                lastUsed[lruIndex] = t;
-            }
-        }
+                frames[lruIndex] = page;                // Set the frame at the lru index to this page
+                lastUsed[lruIndex] = t;                 // Set the last used at the lru index to this index
+            }                                           // End else statement
+        }                                               // End else statement
 
-        if (fault) {
-            for (int f = 0; f < frameCount; f++) {
-                table[f][t] = frames[f];
-            }
-        }
-    }
+        if (fault) {                                    // If the fault is true
+            for (int f = 0;                             // Start of for loop
+                 f < frameCount;                        // As long as index is less than the number of frames we can use
+                 f++) {                                 // Increment index by one
+                table[f][t] = frames[f];                // Set the table at this index to this frame
+            }                                           // End for loop
+        }                                               // End if statement
+    }                                                   // End for loop
 
-    return pageFaults;
-}
+    return pageFaults;                                  // Return the number of page faults that occurred
+}                                                       // End of LRU function
 
+/**
+ * @brief Prints the table to stdout
+ * 
+ * @param refs[] Array of references from input file
+ * @param refCount Number of references in input file
+ * @param frameCount Number of frames allowed to be used per
+ * @param table[][] Table to print
+ * @param pageFaults Number of page faults that occurred
+ */
 
 void printTable(int refs[],
                 int refCount,
@@ -359,65 +407,105 @@ void printTable(int refs[],
                 int pageFaults)
 {
 
-    for (int t = 0; t < refCount; t++) {
-        std::cout << refs[t] << " ";
-    }
-    std::cout << "\n";
+    for (int t = 0;                                     // Start for loop
+         t < refCount;                                  // While the index is less than the number of references in the input file
+         t++) {                                         // Increment the index by one
 
+        std::cout << refs[t] << " ";                    // Add space at current index
+    }                                                   // End for loop        
 
-    for (int t = 0; t < refCount * 2; t++) {
-        std::cout << "-";
-    }
-    std::cout << "\n";
+    std::cout << "\n";                                  // Add new line
 
+    for (int t = 0;                                     // Start for loop
+         t < refCount * 2;                              // While the index is less than twice the number of references in the input file
+         t++) {                                         // Increment the index by one
+        std::cout << "-";                               // Add dash at current index
+    }                                                   // End for loop
+
+    std::cout << "\n";                                  // Add new line
     
-    for (int f = 0; f < frameCount; f++) {
-        for (int t = 0; t < refCount; t++) {
-            if (table[f][t] == -1)
-                std::cout << "  "; 
-            else
-                std::cout << table[f][t] << " ";
-        }
-        std::cout << "\n";
-    }
+    for (int f = 0;                                     // Start for loop
+         f < frameCount;                                // While the index is less than the number of frames that can be used in the frame
+         f++) {                                         // Increment the index by one
 
-    std::cout << "Total page faults = " << pageFaults << "\n";
-}
-         
-int main(int argc, char *argv[]) {
-    
-    if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " <input_file>\n";
-        return 1;
-    }
+        for (int t = 0;                                 // Start for loop 
+             t < refCount;                              // While the index is less than the number of references in the input file
+             t++) {                                     // Increment the index by one
 
-    std::string line = readLineFromFile(argv[1]);
+            if (table[f][t] == -1)                      // If table is equal to -1 (blank)
+                std::cout << "  ";                      // Display space
+            else                                        // Else
+                std::cout << table[f][t] << " ";        // Display the value at this point
+
+        }                                               // End for loop
+
+        std::cout << "\n";                              // Add new line
+
+    }                                                   // End for loop
+
+    std::cout << "Total page faults = " <<              // Display the message for the total number of faults
+        pageFaults << "\n";                             // Display total number of page faults
+}                                                       // End of printTable function
+
+/**
+ * @brief Main function
+ */
+
+int main(int argc, char *argv[]) {                      // Main function
     
-    int frameCount, refCount;
-    char algo;
-    int refs[100];
+    if (argc != 2) {                                    // If the number of arguments is not equal to 2
+        std::cerr << "Usage: " <<                       // Throw an error message
+            argv[0] << " <input_file>\n";               // Display the usage message
+
+        return 1;                                       // Return 1
+    }                                                   // End if statement
+
+    std::string line = readLineFromFile(argv[1]);       // Run readLineFromFile function using argv[1] as an argument
+    
+    int frameCount, refCount;                           // Declare frame count and reference count variables
+    char algo;                                          // Declare algorithm variable
+    int refs[100];                                      // Declare reference count array
 
     int displayTable[50][1000];
 
-    parseInputLine(line, algo, frameCount, refs, refCount);
+    parseInputLine(line,                                // Parse the input line
+                   algo,                                // Algorithm to be used
+                   frameCount,                          // Frame count that can be used
+                   refs,                                // Reference count array
+                   refCount);                           // Number of references from the input line
 
-    wipeTable(displayTable, frameCount, refCount);
+    wipeTable(displayTable, frameCount, refCount);      // Wipe display table
 
-    int pageFaults;
+    int pageFaults;                                     // Declare number of page faults
 
-    switch (algo)
+    switch (algo)                                       // Start switch statement
     {
-        case 'F': case 'f':
-            pageFaults = FIFO(frameCount, refs, refCount, displayTable);
-            break;
-        case 'O': case 'o':
-            pageFaults = OPT(frameCount, refs, refCount, displayTable);
-            break;
-        case 'L': case 'l':
-            pageFaults = LRU(frameCount, refs, refCount, displayTable);
-            break;
+        case 'F': case 'f':                             // If file contains f or F
+            pageFaults = FIFO(frameCount,               // Run FIFO with frameCount
+                              refs,                     // Reference array
+                              refCount,                 // Number of refs from the input line
+                              displayTable);            // The table for displaying
+            break;                                      // Break out of switch statement
+
+        case 'O': case 'o':                             // If file contains o or O
+            pageFaults = OPT(frameCount,                // Run OPT with frameCount
+                             refs,                      // Reference array
+                             refCount,                  // Number of refs from the input line
+                             displayTable);             // The table for displaying
+            break;                                      // Break out of switch statement
+
+        case 'L': case 'l':                             // If file contains l or L
+            pageFaults = LRU(frameCount,                // Run LRU with frameCount
+                             refs,                      // Reference array
+                             refCount,                  // Number of refs from the input line
+                             displayTable);             // The table for displaying
+            break;                                      // Break out of switch statement
     }
 
-    printTable(refs, refCount, frameCount, displayTable, pageFaults);
+    printTable(refs,                                    // Reference array
+               refCount,                                // Number of refs from the input line
+               frameCount,                              // Frame count
+               displayTable,                            // The table for displaying
+               pageFaults);                             // Number of page faults
     
-}
+}                                                       // End main statement
