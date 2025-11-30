@@ -290,18 +290,107 @@ int FIFO(int frameCount,
     return pageFaults;
 }
 
-int OPT(int frameCount,
-         int refs[],
-         int refCount,
-         int table[][1000])
+int OPT(int frameCount,                                 // Number 
+        int refs[],                                     // References from file
+        int refCount,                                   // Number of references
+        int table[][1000])                              // Table to store frames
 {
-    std::cout << "Running OPT" << std::endl;
+    std::cout << "Running OPT" << std::endl;            // Display that the program is running OPT
 
-    std::cout << "Currently, there isn't an implementation for OPT,\n" <<
-                 "so this will just print out a blank table" << std::endl;
+    int frames[50];                                     // Initialize frames array
 
-    return 0;
-}
+    for (int i = 0;                                     // Start of for loop
+         i < frameCount;                                // While index is less than the number of frames
+         i++) {                                         // Increment index
+
+        frames[i] = -1;                                 // Set frame to -1; Zeroize frames
+    }                                                   // End for loop
+
+    int pageFaults = 0;                                 // Initialize page faults to zero
+
+    for (int t = 0;                                     // Start for loop 
+         t < refCount;                                  // While the index is less than the number of references in the input file
+         t++) {                                         // Increment index       
+
+        int page = refs[t];                             // Get the current reference
+
+        int pos = findPage(frames,                      // Find the position of the current reference in the frames array
+                           frameCount,                  // Number of frames we can use
+                           page);                       // What page we are currently on
+
+        bool fault = false;                             // Initialize fault to false
+
+        if (pos == -1) {                                // If position is zeroed
+            fault = true;                               // Set fault to true
+            pageFaults++;                               // Increment page faults
+
+            int freeIndex = -1;                         // Initialize free index to zeroed value
+
+            for (int i = 0;                             // Start for loop
+                 i < frameCount;                        // While the index is less than the number of frames we can use
+                 i++) {                                 // Increment index
+
+                if (frames[i] == -1) {                  // If the current frame is empty
+                    freeIndex = i;                      // Set free index to current frame
+                    break;                              // Break out of loop
+                }                                       // End if statement
+
+            }
+
+            if (freeIndex != -1) {                      // If there is an empty frame
+
+                frames[freeIndex] = page;               // Set the frame to the current page
+
+            } else {                                    // Else
+
+                int replaceIndex = 0;                   // Initialize replace index to zeroed value
+                int farthestUse = -1;                   // Initialize farthest use to zeroed value
+
+                for (int i = 0;                         // Start for loop
+                     i < frameCount;                    // While the index is less than the number of frames we can use
+                     i++) {                             // Increment index
+
+                    int currentPage = frames[i];        // Get the current page
+                    int nextUse = -1;                   // Initialize next use to zeroed value
+
+
+                    for (int j = t + 1;                 // Start for loop
+                         j < refCount;                  // While the index is less than the number of references
+                         j++) {                         // Increment index
+
+                        if (refs[j] == currentPage) {   // If the current reference is equal to the current page
+                            nextUse = j;                // Set next use to the current index
+                            break;                      // Break the loop
+                        }                               // End if statement
+                    }                                   // End for loop
+
+                    if (nextUse == -1) {                // If next use is equal to -1
+
+                        replaceIndex = i;               // Set replace index to i
+                        farthestUse = refCount + 1;     // Set farthest use to ref count + 1
+                        break;                          // Break the loop
+
+                    } else if (nextUse > farthestUse) { // Else if next is greatest than farthest use
+
+                        farthestUse = nextUse;          // Set farthest use to next use
+                        replaceIndex = i;               // Set replace index to i
+                    }                                   // End if statement
+                }                                       // End for loop
+
+                frames[replaceIndex] = page;            // Set frame at replace index to page
+            }                                           // End if statement
+        }                                               // End for loop
+
+        if (fault) {                                    // If fault is true
+            for (int f = 0; f < frameCount; f++) {      // While f is less than frame count
+                table[f][t] = frames[f];                // Set table at f to frames[f]
+            }                                           // End for loop
+        }                                               // End if statement
+    }                                                   // End for statement
+
+    return pageFaults;                                  // Return page faults
+}                                                       // End OPT function
+
 
 /**
  * @brief Runs the LRU algorithm, which will remove the least recently used page from memory when a new page fault occurs
